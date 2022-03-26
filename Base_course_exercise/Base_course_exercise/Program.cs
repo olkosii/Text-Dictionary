@@ -7,22 +7,6 @@ namespace Base_course_exercise
 {
     internal class Program
     {
-        public static List<int> findCoordinates(string [] textLine,string searchWord,int currentLine)
-        {
-            var coordinates = new List<int>();
-
-            for (int j = 0; j < textLine.Length; j++)
-            {
-                if (searchWord == textLine[j])
-                {
-                    coordinates.Add(currentLine);
-                    coordinates.Add(j);
-                    break;
-                }
-            }
-
-            return coordinates;
-        }
         static void Main(string[] args)
         {
             Console.Write("Enter the path to the text file : ");
@@ -30,39 +14,49 @@ namespace Base_course_exercise
             //accepts the path to a text file
             string textPath = Console.ReadLine();
             //store all text from text file
-            string[] allTextArray = File.ReadAllLines(textPath);
+            string[] allTextArray;
+            try
+            {
+                allTextArray = File.ReadAllLines(textPath);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Sorry, there was an error : " + ex.Message);
+                Environment.Exit(0);
+            }
+            allTextArray = File.ReadAllLines(textPath);
 
+            //create a hashtable that would store all words from text file
             Hashtable dictionary = new Hashtable();
             for (int i = 0; i < allTextArray.Length; i++)
             {
                 //array for store words from current line
-                string[] currentLine = allTextArray[i].Split();
+                string[] currentLine = allTextArray[i].Split('.', '?', ',',' ',';','/','(',')','+','-');
 
-                foreach (var word in currentLine)
+                for (int j = 0; j < currentLine.Length; j++)
                 {
                     //skip an empty word from array
-                    if (word == "")
+                    if (currentLine[j] == "")
                         continue;
-                    
-                    //add new word and it's positions to the hashtable(our dictionary)
-                    if (dictionary.ContainsKey(word))
-                    {
-                        var coordinates = findCoordinates(currentLine, word, i);
 
-                        foreach (var coordinate in (List<int>)dictionary[word])
-                        {
-                            coordinates.Add(coordinate);
-                        }
-                        dictionary[word] = coordinates;
+                    //add new word and it's positions to the hashtable(our dictionary)
+                    if (dictionary.ContainsKey(currentLine[j]))
+                    {
+                        var coordinates = new List<int>((List<int>)dictionary[currentLine[j]]);
+                        coordinates.Add(i);
+                        coordinates.Add(j);
+
+                        dictionary[currentLine[j]] = coordinates;
                     }
                     else
                     {
-                        var coordinates = findCoordinates(currentLine, word, i);
+                        var coordinates = new List<int>() { i, j };
 
-                        dictionary.Add(word, coordinates);
+                        dictionary.Add(currentLine[j], coordinates);
                     }
                 }
             }
+
 
             //creat <DictionaryEntry> in order to store sorted entry from dictionary
             var sortedDictionary = new List<DictionaryEntry>(dictionary.Count);
@@ -86,45 +80,56 @@ namespace Base_course_exercise
             sortedDictionary.Reverse();
             //display statistic about every word from dictionary
             Console.WriteLine("Your Dictionary :");
+            Console.WriteLine("Word:    Count of repeated:     Positions of repeated (line position):");
             foreach (DictionaryEntry item in sortedDictionary)
             {
                 int h = 1;
                 var coordinatesList = new List<int>((List<int>)item.Value);
 
-                Console.Write($"Word : '{item.Key}' count of repeated : {coordinatesList.Count/2} " +
-                    $"the positions of occurrences in the text : ");
+                Console.Write($"'{item.Key}'");
+                Console.Write($"\t\t{coordinatesList.Count / 2}\t\t");
 
-                for (int i = 0; i < coordinatesList.Count - 1; i+= 2)
+                for (int i = 0; i < coordinatesList.Count - 1; i += 2)
                 {
-                    Console.Write("\n\tline-" + (coordinatesList[i] + h) + " position-" + (coordinatesList[i + 1] + h));
+                    Console.Write("  " + "(" + (coordinatesList[i] + h) + " " + (coordinatesList[i + 1] + h) + ")");
                 }
 
-                Console.WriteLine();
+                Console.WriteLine("\n");
             }
 
             //give posibility for the user to find a word from dictionary
-            Console.Write("\nEnter the word that you want to find : ");
-            string findWord = Console.ReadLine();
-
-            //check availability of the word in the dictionary and correct input from user
-            if (findWord == null)
-                Console.WriteLine("Invalid word format");
-            else if(dictionary.ContainsKey(findWord) == false)
-                Console.WriteLine("Sorry, dictionary don't have this word");
-            else if (dictionary.ContainsKey(findWord))
+            while (true)
             {
-                var coordinatesList = new List<int>((List<int>)dictionary[findWord]);
-                int one = 1;
+                Console.Write("\nPress 'Esc' to exit or 'Enter' to find the word");
+                ConsoleKey consoleKey = Console.ReadKey().Key;
 
-                Console.Write($"Your word : '{findWord}' count of repeated : {coordinatesList.Count/2} " +
-                    $"the positions of occurrences in the text : " );
+                if (consoleKey == ConsoleKey.Escape)
+                {
+                    break;
+                }
+                
+                Console.Write("\nEnter the word that you want to find: ");
+                string findWord = Console.ReadLine();
 
-                for (int i = 0; i < coordinatesList.Count - 1; i += 2)
-                    Console.Write("\n\tline-" + (coordinatesList[i] + one) + " position-" + (coordinatesList[i + 1] + one));
+                //check availability of the word in the dictionary and correct input from user
+                if (findWord == null)
+                    Console.WriteLine("\nInvalid word format");
+                else if (dictionary.ContainsKey(findWord) == false)
+                    Console.WriteLine("\nSorry, dictionary don't have this word");
+                else if (dictionary.ContainsKey(findWord))
+                {
+                    var coordinatesList = new List<int>((List<int>)dictionary[findWord]);
+                    int one = 1;
+
+                    Console.Write($"\nYour word : '{findWord}' count of repeated : {coordinatesList.Count / 2} " +
+                        $"positions of repeated : ");
+
+                    for (int i = 0; i < coordinatesList.Count - 1; i += 2)
+                        Console.Write("\n\tline-" + (coordinatesList[i] + one) + " position-" + (coordinatesList[i + 1] + one));
+                    Console.WriteLine();
+                }
             }
-
             
-            Console.ReadLine();
         }
     }
 }

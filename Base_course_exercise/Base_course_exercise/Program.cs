@@ -9,23 +9,25 @@ namespace Base_course_exercise
     {
         static void Main(string[] args)
         {
+            string[] allTextArray = null;
             Console.Write("Enter the path to the text file : ");
 
-            //accepts the path to a text file
-            string textPath = Console.ReadLine();
-            //store all text from text file
-            string[] allTextArray;
-            try
+            while (allTextArray == null)
             {
-                allTextArray = File.ReadAllLines(textPath);
+                try
+                {
+                    //accepts the path to a text file
+                    string textPath = Console.ReadLine();
+                    //store all text from text file
+                    allTextArray = File.ReadAllLines(textPath);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Sorry, there was an error : " + ex.Message);
+                    Console.Write("\nPlease try again...\nEnter the path to the text file : ");
+                }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Sorry, there was an error : " + ex.Message);
-                Environment.Exit(0);
-            }
-            allTextArray = File.ReadAllLines(textPath);
-
+            
             //create a hashtable that would store all words from text file
             Hashtable dictionary = new Hashtable();
             for (int i = 0; i < allTextArray.Length; i++)

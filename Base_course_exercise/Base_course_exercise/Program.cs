@@ -85,16 +85,19 @@ namespace Base_course_exercise
             Console.WriteLine("Word:    Count of repeated:     Positions of repeated (line position):");
             foreach (DictionaryEntry item in sortedDictionary)
             {
-                int h = 1;
+                int one = 1;
                 var coordinatesList = new List<int>((List<int>)item.Value);
 
                 Console.Write($"'{item.Key}'");
-                Console.Write($"\t\t{coordinatesList.Count / 2}\t\t");
+                if (item.Key.ToString().Length < 6)
+                    Console.Write($"\t\t{coordinatesList.Count / 2}\t\t");
+                else
+                    Console.Write($"\t{coordinatesList.Count / 2}\t\t");
+
 
                 for (int i = 0; i < coordinatesList.Count - 1; i += 2)
-                {
-                    Console.Write("  " + "(" + (coordinatesList[i] + h) + " " + (coordinatesList[i + 1] + h) + ")");
-                }
+                    Console.Write("  " + "(" + (coordinatesList[i] + one) + " " + (coordinatesList[i + 1] + one) + ")");
+                
 
                 Console.WriteLine("\n");
             }
